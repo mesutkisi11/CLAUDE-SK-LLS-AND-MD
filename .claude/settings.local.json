@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(vercel *)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --yes --name webinar)",
+      "Bash(npm install *)",
+      "Bash(git restore *)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\MSİ\\\\OneDrive\\\\Desktop\\\\WEBİNAR\\\\.claude\\\\skills\\\\saas-iskelet\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\MSİ\\\\OneDrive\\\\Desktop\\\\WEBİNAR\\\\.claude\\\\skills\\\\web-tasarim\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\MSİ\\\\OneDrive\\\\Desktop\\\\WEBİNAR\\\\.claude\\\\skills\\\\kod-incele\")",
+      "Bash(cp \"c:/Users/MSİ/OneDrive/Desktop/gun-2/01-saas-iskelet-skill/SKILL.md\" \"C:/Users/MSİ/OneDrive/Desktop/WEBİNAR/.claude/skills/saas-iskelet/SKILL.md\")",
+      "Bash(cp \"c:/Users/MSİ/OneDrive/Desktop/gun-2/03-web-tasarim-skill/SKILL.md\" \"C:/Users/MSİ/OneDrive/Desktop/WEBİNAR/.claude/skills/web-tasarim/SKILL.md\")",
+      "Bash(cp \"c:/Users/MSİ/OneDrive/Desktop/gun-2/04-kod-incele-skill/SKILL.md\" \"C:/Users/MSİ/OneDrive/Desktop/WEBİNAR/.claude/skills/kod-incele/SKILL.md\")",
+      "Bash(npx shadcn@latest init -d)",
+      "Bash(npx shadcn@latest add card badge input label select textarea separator avatar dropdown-menu sheet dialog)",
+      "Bash(mkdir *)",
+      "Bash(npm run *)",
+      "Bash(npx next *)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const p = require\\('./node_modules/shadcn/package.json'\\); console.log\\(JSON.stringify\\(p.exports, null, 2\\)\\)\")",
+      "Bash(git reset *)",
+      "Bash(Start-Process *)",
+      "Bash(cmd.exe *)",
+      "Bash(taskkill /F /IM node.exe)"
+    ]
+  }
+}
