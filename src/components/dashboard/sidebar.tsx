@@ -5,13 +5,14 @@ import { usePathname, useRouter } from "next/navigation";
 import { type User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { Calendar, Clock, Settings, LogOut, LayoutDashboard } from "lucide-react";
+import { Calendar, Clock, Settings, LogOut, LayoutDashboard, QrCode } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/appointments", label: "Randevular", icon: Calendar },
   { href: "/dashboard/services", label: "Hizmetler", icon: Clock },
+  { href: "/dashboard/menus", label: "QR Menüler", icon: QrCode },
   { href: "/dashboard/settings", label: "Ayarlar", icon: Settings },
 ];
 

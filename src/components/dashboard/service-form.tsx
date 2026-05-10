@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { createService, updateService } from "@/lib/actions/services";
 import type { Service } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -26,12 +27,18 @@ export function ServiceForm({ service }: Props) {
 
   async function handleSubmit(formData: FormData) {
     startTransition(async () => {
-      if (service) {
-        await updateService(service.id, formData);
-      } else {
-        await createService(formData);
+      try {
+        if (service) {
+          await updateService(service.id, formData);
+          toast.success("Hizmet güncellendi");
+        } else {
+          await createService(formData);
+          toast.success("Hizmet eklendi");
+        }
+        setOpen(false);
+      } catch (err) {
+        toast.error((err as Error).message);
       }
-      setOpen(false);
     });
   }
 

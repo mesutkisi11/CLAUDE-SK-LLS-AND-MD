@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { deleteService, toggleService } from "@/lib/actions/services";
 import type { Service } from "@/lib/types";
 import { ServiceForm } from "./service-form";
@@ -44,9 +45,10 @@ export function ServiceList({ services }: { services: Service[] }) {
                 variant={service.is_active ? "default" : "secondary"}
                 className="cursor-pointer shrink-0 ml-2"
                 onClick={() =>
-                  startTransition(() =>
-                    toggleService(service.id, !service.is_active)
-                  )
+                  startTransition(async () => {
+                    await toggleService(service.id, !service.is_active);
+                    toast.success(service.is_active ? "Hizmet pasif yapıldı" : "Hizmet aktif yapıldı");
+                  })
                 }
               >
                 {service.is_active ? "Aktif" : "Pasif"}
@@ -69,7 +71,10 @@ export function ServiceList({ services }: { services: Service[] }) {
                 className="text-destructive hover:text-destructive"
                 disabled={isPending}
                 onClick={() =>
-                  startTransition(() => deleteService(service.id))
+                  startTransition(async () => {
+                    await deleteService(service.id);
+                    toast.success("Hizmet silindi");
+                  })
                 }
               >
                 <Trash2 className="h-4 w-4" />

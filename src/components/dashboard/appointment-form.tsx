@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { createAppointment } from "@/lib/actions/appointments";
 import type { Service } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -34,9 +35,14 @@ export function AppointmentForm({ services }: { services: Service[] }) {
     if (serviceId) formData.set("service_id", serviceId);
     else formData.delete("service_id");
     startTransition(async () => {
-      await createAppointment(formData);
-      setOpen(false);
-      setServiceId(null);
+      try {
+        await createAppointment(formData);
+        toast.success("Randevu oluşturuldu");
+        setOpen(false);
+        setServiceId(null);
+      } catch (err) {
+        toast.error((err as Error).message);
+      }
     });
   }
 

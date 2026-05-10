@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { updateAppointmentStatus, deleteAppointment } from "@/lib/actions/appointments";
 import type { Appointment, AppointmentStatus } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -116,9 +117,10 @@ export function AppointmentList({ appointments }: { appointments: Appointment[] 
                         {appt.status !== "confirmed" && (
                           <DropdownMenuItem
                             onClick={() =>
-                              startTransition(() =>
-                                updateAppointmentStatus(appt.id, "confirmed")
-                              )
+                              startTransition(async () => {
+                                await updateAppointmentStatus(appt.id, "confirmed");
+                                toast.success("Randevu onaylandı");
+                              })
                             }
                           >
                             Onayla
@@ -127,9 +129,10 @@ export function AppointmentList({ appointments }: { appointments: Appointment[] 
                         {appt.status !== "completed" && (
                           <DropdownMenuItem
                             onClick={() =>
-                              startTransition(() =>
-                                updateAppointmentStatus(appt.id, "completed")
-                              )
+                              startTransition(async () => {
+                                await updateAppointmentStatus(appt.id, "completed");
+                                toast.success("Randevu tamamlandı");
+                              })
                             }
                           >
                             Tamamlandı
@@ -138,9 +141,10 @@ export function AppointmentList({ appointments }: { appointments: Appointment[] 
                         {appt.status !== "cancelled" && (
                           <DropdownMenuItem
                             onClick={() =>
-                              startTransition(() =>
-                                updateAppointmentStatus(appt.id, "cancelled")
-                              )
+                              startTransition(async () => {
+                                await updateAppointmentStatus(appt.id, "cancelled");
+                                toast.success("Randevu iptal edildi");
+                              })
                             }
                           >
                             İptal Et
@@ -150,7 +154,10 @@ export function AppointmentList({ appointments }: { appointments: Appointment[] 
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={() =>
-                            startTransition(() => deleteAppointment(appt.id))
+                            startTransition(async () => {
+                              await deleteAppointment(appt.id);
+                              toast.success("Randevu silindi");
+                            })
                           }
                         >
                           <Trash2 className="h-4 w-4 mr-2" />

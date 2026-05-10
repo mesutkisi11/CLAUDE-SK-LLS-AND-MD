@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { deleteMenu } from "@/lib/actions/menus";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ export function MenuList({ menus }: { menus: Menu[] }) {
   async function handleDelete(id: string, name: string) {
     if (!confirm(`"${name}" menüsünü silmek istediğinize emin misiniz?`)) return;
     await deleteMenu(id);
+    toast.success("Menü silindi");
     router.refresh();
   }
 
