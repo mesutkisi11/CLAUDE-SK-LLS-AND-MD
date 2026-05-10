@@ -36,7 +36,11 @@ export async function getMenuById(id: string) {
 }
 
 export async function getPublicMenu(slug: string) {
-  const supabase = await createClient();
+  const { createClient: createDirectClient } = await import("@supabase/supabase-js");
+  const supabase = createDirectClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   const { data } = await supabase
     .from("menus")
     .select(`
