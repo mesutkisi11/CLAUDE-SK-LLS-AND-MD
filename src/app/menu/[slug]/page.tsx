@@ -16,12 +16,15 @@ export default async function PublicMenuPage({ params }: { params: Promise<{ slu
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((cat) => ({ ...cat, menu_items: cat.menu_items.filter(i => i.is_available).sort((a, b) => a.sort_order - b.sort_order) }));
 
+  const logoUrl = menu.slug?.startsWith("wix-garden") ? "/wix-garden-logo.jpg" : undefined;
+
   return (
     <MenuClient
       menuId={menu.id}
       restaurantName={menu.restaurant_name}
       description={menu.description ?? ""}
       themeColor={menu.theme_color}
+      logoUrl={logoUrl}
       categories={categories}
     />
   );
