@@ -29,6 +29,7 @@ export function MenuClient({
   const [tableNumber, setTableNumber] = useState("");
   const [ordering, setOrdering] = useState(false);
   const [done, setDone] = useState(false);
+  const [activeCat, setActiveCat] = useState<string>(() => categories[0]?.id ?? "");
 
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = cart.reduce((s, i) => s + i.item_price * i.quantity, 0);
@@ -100,20 +101,28 @@ export function MenuClient({
       {/* Kategori nav */}
       {categories.length > 1 && (
         <nav className="bg-white border-b px-4 py-2 flex gap-2 overflow-x-auto sticky top-[72px] z-10">
-          {categories.map((cat) => (
-            <a key={cat.id} href={`#cat-${cat.id}`}
-              className="shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-colors"
-              style={{ borderColor: themeColor, color: themeColor }}>
-              {cat.name}
-            </a>
-          ))}
+          {categories.map((cat) => {
+            const isActive = activeCat === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCat(cat.id)}
+                className="shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-colors"
+                style={isActive
+                  ? { backgroundColor: themeColor, borderColor: themeColor, color: "#fff" }
+                  : { borderColor: themeColor, color: themeColor }
+                }>
+                {cat.name}
+              </button>
+            );
+          })}
         </nav>
       )}
 
-      {/* Ürünler */}
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
-        {categories.map((cat) => (
-          <section key={cat.id} id={`cat-${cat.id}`}>
+      {/* Ürünler — sadece seçili kategori */}
+      <main className="max-w-2xl mx-auto px-4 py-6">
+        {categories.filter((cat) => cat.id === activeCat).map((cat) => (
+          <section key={cat.id}>
             <div className="flex items-center gap-3 mb-4">
               <h2 className="text-lg font-bold">{cat.name}</h2>
               <div className="flex-1 h-px bg-gray-200" />
@@ -224,6 +233,12 @@ export function MenuClient({
           <div className="text-center py-20 text-gray-400">
             <UtensilsCrossed className="h-12 w-12 mx-auto mb-3 opacity-30" />
             <p>Menü henüz hazır değil</p>
+          </div>
+        )}
+        {categories.length > 0 && categories.find(c => c.id === activeCat)?.menu_items.length === 0 && (
+          <div className="text-center py-20 text-gray-400">
+            <UtensilsCrossed className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <p>Bu kategoride ürün yok</p>
           </div>
         )}
       </main>
