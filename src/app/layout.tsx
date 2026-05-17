@@ -7,8 +7,8 @@ import { Toaster } from "sonner";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "RandevuPro — Online Randevu Sistemi",
-  description: "İşletmeniz için kolay, hızlı online randevu yönetimi. Berber, klinik, güzellik salonu ve daha fazlası.",
+  title: "QR Menü — Restoran Dijital Menü ve Sipariş Sistemi",
+  description: "Restoranınız için QR kodlu dijital menü ve sipariş yönetim sistemi.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

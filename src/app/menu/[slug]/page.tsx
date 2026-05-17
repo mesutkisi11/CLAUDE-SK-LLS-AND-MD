@@ -10,8 +10,8 @@ export default async function PublicMenuPage({ params }: { params: Promise<{ slu
   if (!menu) notFound();
 
   const categories = (menu.menu_categories as {
-    id: string; name: string; sort_order: number;
-    menu_items: { id: string; name: string; description: string | null; price: number; image_url: string | null; is_available: boolean; sort_order: number }[]
+    id: string; name: string; sort_order: number; station: string;
+    menu_items: { id: string; name: string; description: string | null; price: number; image_url: string | null; is_available: boolean; sort_order: number; options: string | null }[]
   }[])
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((cat) => ({ ...cat, menu_items: cat.menu_items.filter(i => i.is_available).sort((a, b) => a.sort_order - b.sort_order) }));

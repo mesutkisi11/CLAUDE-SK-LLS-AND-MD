@@ -24,8 +24,8 @@ export async function getMenuById(id: string) {
     .select(`
       *,
       menu_categories (
-        id, name, sort_order,
-        menu_items (id, name, description, price, image_url, is_available, sort_order)
+        id, name, sort_order, station,
+        menu_items (id, name, description, price, image_url, is_available, sort_order, options)
       )
     `)
     .eq("id", id)
@@ -46,8 +46,8 @@ export async function getPublicMenu(slug: string) {
     .select(`
       *,
       menu_categories (
-        id, name, sort_order,
-        menu_items (id, name, description, price, image_url, is_available, sort_order)
+        id, name, sort_order, station,
+        menu_items (id, name, description, price, image_url, is_available, sort_order, options)
       )
     `)
     .eq("slug", slug)
@@ -107,11 +107,12 @@ export async function deleteMenu(id: string) {
   revalidatePath("/dashboard/menus");
 }
 
-export async function createCategory(menuId: string, name: string) {
+export async function createCategory(menuId: string, name: string, station = "mutfak") {
   const supabase = await createClient();
   const { data, error } = await supabase.from("menu_categories").insert({
     menu_id: menuId,
     name,
+    station,
     sort_order: 0,
   }).select().single();
 
@@ -120,9 +121,11 @@ export async function createCategory(menuId: string, name: string) {
   return data;
 }
 
-export async function updateCategory(id: string, name: string, menuId: string) {
+export async function updateCategory(id: string, name: string, menuId: string, station?: string) {
   const supabase = await createClient();
-  const { error } = await supabase.from("menu_categories").update({ name }).eq("id", id);
+  const update: Record<string, string> = { name };
+  if (station) update.station = station;
+  const { error } = await supabase.from("menu_categories").update(update).eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath(`/dashboard/menus/${menuId}`);
 }
@@ -137,7 +140,7 @@ export async function deleteCategory(id: string, menuId: string) {
 export async function createMenuItem(
   categoryId: string,
   menuId: string,
-  data: { name: string; description: string; price: number; image_url: string }
+  data: { name: string; description: string; price: number; image_url: string; options: string }
 ) {
   const supabase = await createClient();
   const { data: item, error } = await supabase.from("menu_items").insert({
@@ -146,6 +149,7 @@ export async function createMenuItem(
     description: data.description || null,
     price: data.price,
     image_url: data.image_url || null,
+    options: data.options || null,
     is_available: true,
   }).select().single();
 
@@ -157,7 +161,7 @@ export async function createMenuItem(
 export async function updateMenuItem(
   id: string,
   menuId: string,
-  data: { name: string; description: string; price: number; image_url: string; is_available: boolean }
+  data: { name: string; description: string; price: number; image_url: string; is_available: boolean; options: string }
 ) {
   const supabase = await createClient();
   const { error } = await supabase.from("menu_items").update({
@@ -166,6 +170,7 @@ export async function updateMenuItem(
     price: data.price,
     image_url: data.image_url || null,
     is_available: data.is_available,
+    options: data.options || null,
   }).eq("id", id);
 
   if (error) throw new Error(error.message);

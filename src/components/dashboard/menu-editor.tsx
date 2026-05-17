@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2, Check, X, ChevronDown, ChevronUp } from "lucide-react";
 
 type MenuItem = {
@@ -20,11 +21,13 @@ type MenuItem = {
   price: number;
   image_url: string | null;
   is_available: boolean;
+  options: string | null;
 };
 
 type Category = {
   id: string;
   name: string;
+  station: string;
   menu_items: MenuItem[];
 };
 
@@ -56,6 +59,7 @@ function ItemForm({
     price: initial?.price?.toString() ?? "",
     image_url: initial?.image_url ?? "",
     is_available: initial?.is_available ?? true,
+    options: initial?.options ?? "",
   });
 
   function set(k: keyof typeof form, v: string | boolean) {
@@ -70,6 +74,7 @@ function ItemForm({
       price: parseFloat(form.price) || 0,
       image_url: form.image_url,
       is_available: form.is_available,
+      options: form.options,
     };
     start(async () => {
       if (initial) {
@@ -85,17 +90,30 @@ function ItemForm({
     <form onSubmit={handleSubmit} className="bg-muted/50 rounded-lg p-4 space-y-3 mt-2">
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2 space-y-1">
-          <Label className="text-xs">Ürün Adı *</Label>
+          <Label className="text-xs font-semibold">Ürün Adı *</Label>
           <Input
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
             placeholder="Adana Kebap"
             required
-            className="h-8 text-sm"
+            className="h-9 text-sm"
+          />
+        </div>
+        <div className="col-span-2 space-y-1">
+          <Label className="text-xs font-semibold">
+            Açıklama
+            <span className="font-normal text-muted-foreground ml-1">(müşteri menüsünde görünür)</span>
+          </Label>
+          <Textarea
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+            placeholder="örn: ızgara tavuk, roka salatası, özel sos ile servis edilir..."
+            className="text-sm resize-none"
+            rows={2}
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Fiyat (₺) *</Label>
+          <Label className="text-xs font-semibold">Fiyat (₺) *</Label>
           <Input
             type="number"
             step="0.01"
@@ -104,36 +122,46 @@ function ItemForm({
             onChange={(e) => set("price", e.target.value)}
             placeholder="0.00"
             required
-            className="h-8 text-sm"
+            className="h-9 text-sm"
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Durum</Label>
+          <Label className="text-xs font-semibold">Durum</Label>
           <select
             value={form.is_available ? "true" : "false"}
             onChange={(e) => set("is_available", e.target.value === "true")}
-            className="h-8 w-full rounded-md border bg-background px-2 text-sm"
+            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
           >
-            <option value="true">Mevcut</option>
-            <option value="false">Tükendi</option>
+            <option value="true">✅ Mevcut</option>
+            <option value="false">❌ Tükendi</option>
           </select>
         </div>
         <div className="col-span-2 space-y-1">
-          <Label className="text-xs">Açıklama</Label>
+          <Label className="text-xs font-semibold">
+            Müşteri Seçenekleri
+            <span className="font-normal text-muted-foreground ml-1">(virgülle ayır)</span>
+          </Label>
           <Input
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-            placeholder="Kısa açıklama..."
-            className="h-8 text-sm"
+            value={form.options}
+            onChange={(e) => set("options", e.target.value)}
+            placeholder="örn: Bol acılı, Acısız, Soğansız, Ekstra sos"
+            className="h-9 text-sm"
           />
+          {form.options && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {form.options.split(",").map((o) => o.trim()).filter(Boolean).map((o) => (
+                <span key={o} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">{o}</span>
+              ))}
+            </div>
+          )}
         </div>
         <div className="col-span-2 space-y-1">
-          <Label className="text-xs">Görsel URL (opsiyonel)</Label>
+          <Label className="text-xs font-semibold">Görsel URL <span className="font-normal text-muted-foreground">(opsiyonel)</span></Label>
           <Input
             value={form.image_url}
             onChange={(e) => set("image_url", e.target.value)}
             placeholder="https://..."
-            className="h-8 text-sm"
+            className="h-9 text-sm"
           />
         </div>
       </div>
@@ -151,6 +179,11 @@ function ItemForm({
   );
 }
 
+const STATION_OPTIONS = [
+  { value: "mutfak", label: "🍽️ Mutfak" },
+  { value: "bar", label: "🍹 Bar" },
+];
+
 function CategorySection({
   category,
   menuId,
@@ -163,14 +196,22 @@ function CategorySection({
   const [expanded, setExpanded] = useState(true);
   const [editingName, setEditingName] = useState(false);
   const [catName, setCatName] = useState(category.name);
+  const [catStation, setCatStation] = useState(category.station || "mutfak");
   const [showAddItem, setShowAddItem] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   function saveCatName() {
     start(async () => {
-      await updateCategory(category.id, catName, menuId);
+      await updateCategory(category.id, catName, menuId, catStation);
       setEditingName(false);
+    });
+  }
+
+  function handleStationChange(newStation: string) {
+    setCatStation(newStation);
+    start(async () => {
+      await updateCategory(category.id, catName, menuId, newStation);
     });
   }
 
@@ -203,6 +244,16 @@ function CategorySection({
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm">{category.name}</span>
             <span className="text-xs text-muted-foreground">({category.menu_items.length} ürün)</span>
+            <select
+              value={catStation}
+              onChange={(e) => handleStationChange(e.target.value)}
+              disabled={pending}
+              className="h-6 rounded border bg-background px-1.5 text-xs text-muted-foreground cursor-pointer"
+            >
+              {STATION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
           </div>
         )}
         <div className="flex items-center gap-1">
@@ -313,6 +364,7 @@ function CategorySection({
 
 export function MenuEditor({ menu, appUrl }: { menu: Menu; appUrl: string }) {
   const [newCatName, setNewCatName] = useState("");
+  const [newCatStation, setNewCatStation] = useState("mutfak");
   const [showAddCat, setShowAddCat] = useState(false);
   const [pending, start] = useTransition();
 
@@ -322,8 +374,9 @@ export function MenuEditor({ menu, appUrl }: { menu: Menu; appUrl: string }) {
     e.preventDefault();
     if (!newCatName.trim()) return;
     start(async () => {
-      await createCategory(menu.id, newCatName.trim());
+      await createCategory(menu.id, newCatName.trim(), newCatStation);
       setNewCatName("");
+      setNewCatStation("mutfak");
       setShowAddCat(false);
     });
   }
@@ -350,6 +403,14 @@ export function MenuEditor({ menu, appUrl }: { menu: Menu; appUrl: string }) {
               className="flex-1"
               autoFocus
             />
+            <select
+              value={newCatStation}
+              onChange={(e) => setNewCatStation(e.target.value)}
+              className="h-10 rounded-md border bg-background px-2 text-sm"
+            >
+              <option value="mutfak">🍽️ Mutfak</option>
+              <option value="bar">🍹 Bar</option>
+            </select>
             <Button type="submit" disabled={pending || !newCatName.trim()}>
               Ekle
             </Button>

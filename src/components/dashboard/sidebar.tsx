@@ -11,8 +11,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/orders", label: "Siparişler", icon: ShoppingBag },
-  { href: "/dashboard/appointments", label: "Randevular", icon: Calendar },
-  { href: "/dashboard/services", label: "Hizmetler", icon: Clock },
   { href: "/dashboard/menus", label: "QR Menüler", icon: QrCode },
   { href: "/dashboard/settings", label: "Ayarlar", icon: Settings },
 ];
@@ -35,9 +33,9 @@ export function Sidebar({ user }: { user: User }) {
       <div className="p-6 border-b">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <Calendar className="h-4 w-4 text-primary-foreground" />
+            <QrCode className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-semibold text-lg">RandevuPro</span>
+          <span className="font-semibold text-lg">QR Menü</span>
         </Link>
       </div>
 

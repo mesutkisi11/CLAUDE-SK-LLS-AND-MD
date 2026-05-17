@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, Star, CheckCircle } from "lucide-react";
+import { QrCode, Clock, Users, Star, CheckCircle } from "lucide-react";
 
 export default function Home() {
   return (
@@ -9,9 +9,9 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <Calendar className="h-4 w-4 text-primary-foreground" />
+              <QrCode className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-lg">RandevuPro</span>
+            <span className="font-semibold text-lg">QR Menü</span>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login">
@@ -60,9 +60,9 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                icon: Calendar,
-                title: "Online Randevu",
-                desc: "Müşterileriniz 7/24, telefonla aramadan randevu alabilir. Siz uyurken de iş yapın.",
+                icon: QrCode,
+                title: "QR Kod ile Menü",
+                desc: "Müşterileriniz masadaki QR kodu tarayarak menüye ulaşır. Güncel fiyatlar, fotoğraflar, açıklamalar.",
               },
               {
                 icon: Clock,
@@ -153,7 +153,7 @@ export default function Home() {
 
       <footer className="border-t py-8">
         <div className="max-w-6xl mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 RandevuPro — Made with Claude Code
+          © 2026 QR Menü — Made with Claude Code
         </div>
       </footer>
     </div>

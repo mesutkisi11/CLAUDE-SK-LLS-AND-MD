@@ -1,47 +1,54 @@
 import { createClient } from "@/lib/supabase/server";
-import { getDashboardStats, getAppointments } from "@/lib/actions/appointments";
+import { getAllOrders } from "@/lib/actions/orders";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Users, TrendingUp } from "lucide-react";
+import { ShoppingBag, Clock, QrCode, Settings } from "lucide-react";
 
-function formatTime(time: string) {
-  return time.slice(0, 5);
-}
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Yeni",
+  preparing: "Hazırlanıyor",
+  ready: "Hazır",
+  delivered: "Teslim",
+};
+
+const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
+  pending: "default",
+  preparing: "secondary",
+  ready: "outline",
+  delivered: "outline",
+};
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const fullName = user?.user_metadata?.full_name ?? user?.email?.split("@")[0];
 
-  const [stats, appointments] = await Promise.all([
-    getDashboardStats(),
-    getAppointments(),
-  ]);
+  const orders = await getAllOrders();
 
   const today = new Date().toISOString().split("T")[0];
-  const upcoming = appointments
-    .filter((a) => a.appointment_date >= today && a.status !== "cancelled")
-    .slice(0, 5);
+  const todayOrders = orders.filter((o: any) => o.created_at?.startsWith(today));
+  const pendingOrders = orders.filter((o: any) => o.status === "pending");
+  const recentOrders = orders.slice(0, 5);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold">Hoş geldin, {fullName} 👋</h1>
-        <p className="text-muted-foreground mt-1">Bugünün randevu özetine göz at</p>
+        <p className="text-muted-foreground mt-1">Siparişlerine ve menülerine göz at</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Bugünkü Randevular
+              Bugünkü Siparişler
             </CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.today}</div>
+            <div className="text-2xl font-bold">{todayOrders.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {stats.today === 0 ? "Bugün randevu yok" : "randevu var"}
+              {todayOrders.length === 0 ? "Bugün sipariş yok" : "sipariş alındı"}
             </p>
           </CardContent>
         </Card>
@@ -49,26 +56,28 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Bu Hafta
+              Bekleyen Siparişler
             </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.thisWeek}</div>
-            <p className="text-xs text-muted-foreground mt-1">toplam randevu</p>
+            <div className="text-2xl font-bold">{pendingOrders.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {pendingOrders.length === 0 ? "Bekleyen sipariş yok" : "işlem bekliyor"}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Toplam Müşteri
+              Toplam Sipariş
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.customers}</div>
-            <p className="text-xs text-muted-foreground mt-1">kayıtlı randevu</p>
+            <div className="text-2xl font-bold">{orders.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">tüm zamanlar</p>
           </CardContent>
         </Card>
       </div>
@@ -76,27 +85,26 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Yaklaşan Randevular</CardTitle>
+            <CardTitle>Son Siparişler</CardTitle>
           </CardHeader>
           <CardContent>
-            {upcoming.length === 0 ? (
+            {recentOrders.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
-                <Calendar className="h-10 w-10 mb-3 opacity-25" />
-                <p className="text-sm">Yaklaşan randevu yok</p>
+                <ShoppingBag className="h-10 w-10 mb-3 opacity-25" />
+                <p className="text-sm">Henüz sipariş yok</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {upcoming.map((appt) => (
-                  <div key={appt.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                {recentOrders.map((order: any) => (
+                  <div key={order.id} className="flex items-center justify-between py-2 border-b last:border-0">
                     <div>
-                      <p className="text-sm font-medium">{appt.customer_name}</p>
+                      <p className="text-sm font-medium">Masa {order.table_number}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(appt.appointment_date).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })} · {formatTime(appt.appointment_time)}
-                        {appt.services && ` · ${appt.services.name}`}
+                        {order.menus?.restaurant_name ?? order.menus?.name} · {order.total_price} TL
                       </p>
                     </div>
-                    <Badge variant={appt.status === "confirmed" ? "default" : "outline"}>
-                      {appt.status === "confirmed" ? "Onaylandı" : "Bekliyor"}
+                    <Badge variant={STATUS_VARIANT[order.status] ?? "outline"}>
+                      {STATUS_LABEL[order.status] ?? order.status}
                     </Badge>
                   </div>
                 ))}
@@ -111,9 +119,9 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {[
-              { href: "/dashboard/appointments", icon: Calendar, title: "Randevu Ekle", desc: "Manuel randevu oluştur" },
-              { href: "/dashboard/services", icon: TrendingUp, title: "Hizmet Ekle", desc: "Sunduğunuz hizmetleri tanımlayın" },
-              { href: "/dashboard/settings", icon: Users, title: "Profili Düzenle", desc: "İşletme bilgilerinizi güncelleyin" },
+              { href: "/dashboard/orders", icon: ShoppingBag, title: "Siparişleri Görüntüle", desc: "Mutfak ekranı ve sipariş durumları" },
+              { href: "/dashboard/menus", icon: QrCode, title: "QR Menü Yönet", desc: "Menü, kategori ve ürün ekle/düzenle" },
+              { href: "/dashboard/settings", icon: Settings, title: "Ayarlar", desc: "İşletme bilgilerini güncelle" },
             ].map(({ href, icon: Icon, title, desc }) => (
               <a key={href} href={href} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <Icon className="h-5 w-5 text-primary" />

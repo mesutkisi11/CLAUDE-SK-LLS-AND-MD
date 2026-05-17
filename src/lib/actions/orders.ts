@@ -4,10 +4,10 @@ import { createClient as createDirectClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-function anonClient() {
+function serviceClient() {
   return createDirectClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 }
 
@@ -17,6 +17,7 @@ export type CartItem = {
   item_price: number;
   quantity: number;
   note: string;
+  station: string;
 };
 
 export async function submitOrder(
@@ -24,7 +25,7 @@ export async function submitOrder(
   tableNumber: string,
   items: CartItem[]
 ) {
-  const supabase = anonClient();
+  const supabase = serviceClient();
 
   const total = items.reduce((s, i) => s + i.item_price * i.quantity, 0);
 
@@ -44,6 +45,7 @@ export async function submitOrder(
       item_price: i.item_price,
       quantity: i.quantity,
       note: i.note || null,
+      station: i.station || "mutfak",
     }))
   );
 

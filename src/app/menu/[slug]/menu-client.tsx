@@ -5,12 +5,14 @@ import { toast } from "sonner";
 import { submitOrder, type CartItem } from "@/lib/actions/orders";
 import { ShoppingCart, Plus, Minus, X, ChevronDown, Send, UtensilsCrossed } from "lucide-react";
 
+
 type MenuItem = {
   id: string; name: string; description: string | null;
   price: number; image_url: string | null;
   is_available: boolean; sort_order: number;
+  options: string | null;
 };
-type Category = { id: string; name: string; sort_order: number; menu_items: MenuItem[] };
+type Category = { id: string; name: string; sort_order: number; station: string; menu_items: MenuItem[] };
 
 type CartEntry = CartItem & { key: string };
 
@@ -21,8 +23,8 @@ export function MenuClient({
   themeColor: string; categories: Category[];
 }) {
   const [cart, setCart] = useState<CartEntry[]>([]);
-  const [noteFor, setNoteFor] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({});
   const [cartOpen, setCartOpen] = useState(false);
   const [tableNumber, setTableNumber] = useState("");
   const [ordering, setOrdering] = useState(false);
@@ -31,11 +33,11 @@ export function MenuClient({
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = cart.reduce((s, i) => s + i.item_price * i.quantity, 0);
 
-  function addToCart(item: MenuItem) {
+  function addToCart(item: MenuItem, station = "mutfak") {
     setCart((prev) => {
       const existing = prev.find((e) => e.menu_item_id === item.id);
       if (existing) return prev.map((e) => e.menu_item_id === item.id ? { ...e, quantity: e.quantity + 1 } : e);
-      return [...prev, { key: item.id, menu_item_id: item.id, item_name: item.name, item_price: item.price, quantity: 1, note: "" }];
+      return [...prev, { key: item.id, menu_item_id: item.id, item_name: item.name, item_price: item.price, quantity: 1, note: "", station }];
     });
     toast.success(`${item.name} sepete eklendi`, { duration: 1500 });
   }
@@ -53,12 +55,6 @@ export function MenuClient({
     setCart((prev) => prev.filter((e) => e.menu_item_id !== itemId));
   }
 
-  function saveNote(itemId: string) {
-    const note = notes[itemId] ?? "";
-    setCart((prev) => prev.map((e) => e.menu_item_id === itemId ? { ...e, note } : e));
-    setNoteFor(null);
-    if (note) toast.success("Not kaydedildi");
-  }
 
   async function handleOrder() {
     if (!tableNumber.trim()) { toast.error("Masa numarası girin"); return; }
@@ -125,18 +121,18 @@ export function MenuClient({
             <div className="space-y-3">
               {cat.menu_items.map((item) => {
                 const inCart = cart.find((e) => e.menu_item_id === item.id);
+                const itemOptions = item.options ? item.options.split(",").map(o => o.trim()).filter(Boolean) : [];
                 return (
                   <div key={item.id} className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    {/* Ürün başlık satırı */}
                     <div className="flex">
                       {item.image_url && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={item.image_url} alt={item.name} className="w-24 h-24 object-cover shrink-0" />
                       )}
-                      <div className="flex-1 p-3 flex flex-col justify-between">
-                        <div>
-                          <h3 className="font-semibold text-gray-900 leading-tight">{item.name}</h3>
-                          {item.description && <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>}
-                        </div>
+                      <div className="flex-1 p-3">
+                        <h3 className="font-semibold text-gray-900 leading-tight">{item.name}</h3>
+                        {item.description && <p className="text-sm text-gray-500 mt-1 leading-snug">{item.description}</p>}
                         <div className="flex items-center justify-between mt-2">
                           <span className="font-bold text-base" style={{ color: themeColor }}>
                             ₺{Number(item.price).toFixed(2)}
@@ -149,51 +145,71 @@ export function MenuClient({
                                 <Minus className="h-3 w-3" />
                               </button>
                               <span className="font-bold text-sm w-4 text-center">{inCart.quantity}</span>
-                              <button onClick={() => addToCart(item)}
+                              <button onClick={() => addToCart(item, cat.station)}
                                 className="h-7 w-7 rounded-full flex items-center justify-center text-white"
                                 style={{ backgroundColor: themeColor }}>
                                 <Plus className="h-3 w-3" />
                               </button>
                             </div>
                           ) : (
-                            <button onClick={() => addToCart(item)}
+                            <button onClick={() => addToCart(item, cat.station)}
                               className="h-8 px-4 rounded-full text-white text-sm font-medium"
                               style={{ backgroundColor: themeColor }}>
                               Ekle
                             </button>
                           )}
                         </div>
-                        {inCart && (
-                          <button
-                            onClick={() => { setNoteFor(item.id); setNotes((p) => ({ ...p, [item.id]: inCart.note || "" })); }}
-                            className="mt-1 text-xs text-left underline-offset-2"
-                            style={{ color: themeColor }}>
-                            {inCart.note ? `Not: ${inCart.note}` : "+ Not ekle (mantar olmasın, iyi pişsin...)"}
-                          </button>
-                        )}
                       </div>
                     </div>
-                    {/* Not modal */}
-                    {noteFor === item.id && (
-                      <div className="border-t p-3 bg-gray-50">
-                        <textarea
-                          className="w-full text-sm border rounded-lg p-2 resize-none focus:outline-none"
-                          rows={2}
-                          placeholder="örn: mantar olmasın, et iyi pişsin, az acılı..."
-                          value={notes[item.id] ?? ""}
-                          onChange={(e) => setNotes((p) => ({ ...p, [item.id]: e.target.value }))}
-                          autoFocus
-                        />
-                        <div className="flex gap-2 mt-2">
-                          <button onClick={() => saveNote(item.id)}
-                            className="px-4 py-1.5 rounded-lg text-white text-sm font-medium"
-                            style={{ backgroundColor: themeColor }}>
-                            Kaydet
-                          </button>
-                          <button onClick={() => setNoteFor(null)}
-                            className="px-4 py-1.5 rounded-lg border text-sm">
-                            İptal
-                          </button>
+
+                    {/* Seçenekler + Not — sepete eklince görünür */}
+                    {inCart && (
+                      <div className="border-t bg-gray-50 p-3 space-y-3">
+                        {itemOptions.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 mb-1.5">Nasıl hazırlansın?</p>
+                            <div className="flex flex-wrap gap-2">
+                              {itemOptions.map((opt) => {
+                                const active = (selectedOptions[item.id] ?? []).includes(opt);
+                                return (
+                                  <button
+                                    key={opt}
+                                    type="button"
+                                    onClick={() => {
+                                      const current = selectedOptions[item.id] ?? [];
+                                      const updated = current.includes(opt)
+                                        ? current.filter(o => o !== opt)
+                                        : [...current, opt];
+                                      setSelectedOptions(prev => ({ ...prev, [item.id]: updated }));
+                                      const freeNote = notes[item.id] ?? "";
+                                      const note = [updated.join(", "), freeNote].filter(Boolean).join(" | ");
+                                      setCart(prev => prev.map(e => e.menu_item_id === item.id ? { ...e, note } : e));
+                                    }}
+                                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${active ? "text-white border-transparent" : "bg-white border-gray-300 text-gray-700"}`}
+                                    style={active ? { backgroundColor: themeColor, borderColor: themeColor } : undefined}
+                                  >
+                                    {active ? "✓ " : ""}{opt}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 mb-1.5">Özel istek / not</p>
+                          <textarea
+                            className="w-full text-sm border rounded-lg p-2 resize-none focus:outline-none bg-white"
+                            rows={2}
+                            placeholder="örn: mantar olmasın, et iyi pişsin..."
+                            value={notes[item.id] ?? ""}
+                            onChange={(e) => {
+                              const freeNote = e.target.value;
+                              setNotes(prev => ({ ...prev, [item.id]: freeNote }));
+                              const opts = selectedOptions[item.id] ?? [];
+                              const note = [opts.join(", "), freeNote].filter(Boolean).join(" | ");
+                              setCart(prev => prev.map(en => en.menu_item_id === item.id ? { ...en, note } : en));
+                            }}
+                          />
                         </div>
                       </div>
                     )}
@@ -260,8 +276,8 @@ export function MenuClient({
                       </button>
                       <span className="text-sm font-bold w-4 text-center">{entry.quantity}</span>
                       <button onClick={() => {
-                        const item = categories.flatMap(c => c.menu_items).find(i => i.id === entry.menu_item_id);
-                        if (item) addToCart(item);
+                        const found = categories.flatMap(c => c.menu_items.map(i => ({ item: i, station: c.station }))).find(x => x.item.id === entry.menu_item_id);
+                        if (found) addToCart(found.item, found.station);
                       }}
                         className="h-6 w-6 rounded-full flex items-center justify-center text-white text-xs"
                         style={{ backgroundColor: themeColor }}>
