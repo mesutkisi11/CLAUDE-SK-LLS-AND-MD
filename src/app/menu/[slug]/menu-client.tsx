@@ -142,9 +142,11 @@ export function MenuClient({
                       <div className="flex-1 p-3">
                         <h3 className="font-semibold text-gray-900 leading-tight">{item.name}</h3>
                         {item.description && <p className="text-sm text-gray-500 mt-1 leading-snug">{item.description}</p>}
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="font-bold text-base" style={{ color: themeColor }}>
-                            ₺{Number(item.price).toFixed(2)}
+                        <div className="flex items-center justify-between mt-3">
+                          <span className="font-extrabold text-xl" style={{ color: themeColor }}>
+                            {Number(item.price) % 1 === 0
+                              ? `${Number(item.price).toLocaleString("tr-TR")} ₺`
+                              : `${Number(item.price).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺`}
                           </span>
                           {inCart ? (
                             <div className="flex items-center gap-2">
@@ -254,7 +256,7 @@ export function MenuClient({
               <ShoppingCart className="h-5 w-5" />
               {totalItems} ürün
             </span>
-            <span>₺{totalPrice.toFixed(2)}</span>
+            <span>{totalPrice.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ₺</span>
             <ChevronDown className="h-4 w-4 rotate-180" />
           </button>
         </div>
@@ -281,7 +283,7 @@ export function MenuClient({
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-sm font-semibold" style={{ color: themeColor }}>
-                      ₺{(entry.item_price * entry.quantity).toFixed(2)}
+                      {(entry.item_price * entry.quantity).toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ₺
                     </span>
                     <div className="flex items-center gap-1.5">
                       <button onClick={() => removeFromCart(entry.menu_item_id)}
@@ -321,7 +323,7 @@ export function MenuClient({
               </div>
               <div className="flex items-center justify-between text-sm font-semibold">
                 <span>Toplam</span>
-                <span style={{ color: themeColor }}>₺{totalPrice.toFixed(2)}</span>
+                <span style={{ color: themeColor }}>{totalPrice.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ₺</span>
               </div>
               <button
                 onClick={handleOrder}
