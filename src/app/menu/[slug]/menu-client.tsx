@@ -34,7 +34,7 @@ export function MenuClient({
     setCart((prev) => {
       const existing = prev.find((e) => e.menu_item_id === item.id);
       if (existing) return prev.map((e) => e.menu_item_id === item.id ? { ...e, quantity: e.quantity + 1 } : e);
-      return [...prev, { key: item.id, menu_item_id: item.id, item_name: item.name, item_price: item.price, quantity: 1, note: "" }];
+      return [...prev, { key: item.id, menu_item_id: item.id, item_name: item.name, item_price: item.price, quantity: 1, note: "", station: "" }];
     });
     toast.success(`${item.name} sepete eklendi`, { duration: 1500 });
   }
