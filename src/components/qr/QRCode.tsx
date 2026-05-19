@@ -27,7 +27,7 @@ export function QRCode({ url, size = 200, color = "#f59e0b" }: QRCodeProps) {
   return <canvas ref={canvasRef} className="rounded-lg" />;
 }
 
-export function QRCodeDownload({ url, restaurantName, color = "#f59e0b" }: { url: string; restaurantName: string; color?: string }) {
+export function QRCodeDownload({ url, restaurantName, color = "#f59e0b", tableLabel }: { url: string; restaurantName: string; color?: string; tableLabel?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -55,20 +55,29 @@ export function QRCodeDownload({ url, restaurantName, color = "#f59e0b" }: { url
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 22px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(restaurantName, 200, 38);
+    if (tableLabel) {
+      ctx.fillText(`${restaurantName} — ${tableLabel}`, 200, 38);
+    } else {
+      ctx.fillText(restaurantName, 200, 38);
+    }
 
     ctx.drawImage(canvasRef.current, 50, 70);
 
     ctx.fillStyle = "#6b7280";
     ctx.font = "14px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Menüyü görmek için QR kodu okutun", 200, 420);
+    if (tableLabel) {
+      ctx.fillText(`${tableLabel} için QR kodu okutun`, 200, 420);
+    } else {
+      ctx.fillText("Menüyü görmek için QR kodu okutun", 200, 420);
+    }
     ctx.fillStyle = color;
     ctx.font = "12px sans-serif";
     ctx.fillText(url, 200, 445);
 
+    const masaNo = tableLabel ? tableLabel.split(" ")[1] : null;
     const link = document.createElement("a");
-    link.download = `${restaurantName}-qr-menu.png`;
+    link.download = masaNo ? `masa-${masaNo}-qr.png` : `${restaurantName}-qr-menu.png`;
     link.href = downloadCanvas.toDataURL("image/png");
     link.click();
   }

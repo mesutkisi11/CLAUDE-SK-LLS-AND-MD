@@ -4,8 +4,15 @@ import { MenuClient } from "./menu-client";
 
 export const dynamic = "force-dynamic";
 
-export default async function PublicMenuPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function PublicMenuPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ table?: string }>;
+}) {
   const { slug } = await params;
+  const { table: tableParam = "" } = await searchParams;
   const menu = await getPublicMenu(slug);
   if (!menu) notFound();
 
@@ -26,6 +33,7 @@ export default async function PublicMenuPage({ params }: { params: Promise<{ slu
       themeColor={menu.theme_color}
       logoUrl={logoUrl}
       categories={categories}
+      initialTable={tableParam}
     />
   );
 }

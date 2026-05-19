@@ -14,16 +14,17 @@ type Category = { id: string; name: string; sort_order: number; station: string;
 type CartEntry = CartItem & { key: string };
 
 export function MenuClient({
-  menuId, restaurantName, description, themeColor, logoUrl, categories,
+  menuId, restaurantName, description, themeColor, logoUrl, categories, initialTable,
 }: {
   menuId: string; restaurantName: string; description: string;
-  themeColor: string; logoUrl?: string; categories: Category[];
+  themeColor: string; logoUrl?: string; categories: Category[]; initialTable?: string;
 }) {
   const [cart, setCart] = useState<CartEntry[]>([]);
   const [noteFor, setNoteFor] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [cartOpen, setCartOpen] = useState(false);
-  const [tableNumber, setTableNumber] = useState("");
+  const [tableNumber, setTableNumber] = useState(initialTable ?? "");
+  const tableIsLocked = Boolean(initialTable);
   const [ordering, setOrdering] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -276,13 +277,28 @@ export function MenuClient({
             <div className="p-4 border-t space-y-3">
               <div className="flex items-center gap-3">
                 <label className="text-sm font-medium shrink-0">Masa No:</label>
-                <input
-                  type="text"
-                  value={tableNumber}
-                  onChange={(e) => setTableNumber(e.target.value)}
-                  placeholder="örn: 5"
-                  className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                />
+                {tableIsLocked ? (
+                  <div style={{
+                    padding: "10px 14px",
+                    background: "rgba(240,124,16,0.08)",
+                    border: "1px solid rgba(240,124,16,0.15)",
+                    borderRadius: "8px",
+                    color: "#8b7355",
+                    fontSize: "14px",
+                    cursor: "default",
+                    flex: 1,
+                  }}>
+                    Masa {initialTable}
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value={tableNumber}
+                    onChange={(e) => setTableNumber(e.target.value)}
+                    placeholder="örn: 5"
+                    className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                  />
+                )}
               </div>
               <div className="flex items-center justify-between text-sm font-semibold">
                 <span>Toplam</span>

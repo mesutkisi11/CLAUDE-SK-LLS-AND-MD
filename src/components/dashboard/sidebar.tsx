@@ -13,6 +13,8 @@ import {
   LogOut,
   Menu,
   X,
+  BarChart2,
+  Table2,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -24,6 +26,8 @@ const BORDER = "rgba(240,124,16,0.15)";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/orders", label: "Siparişler", icon: ShoppingBag },
+  { href: "/dashboard/analytics", label: "Analitik", icon: BarChart2 },
+  { href: "/dashboard/tables", label: "Masa QR", icon: Table2 },
   { href: "/dashboard/menus", label: "QR Menüler", icon: QrCode },
   { href: "/dashboard/settings", label: "Ayarlar", icon: Settings },
 ];
