@@ -15,27 +15,32 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function loginWithCredentials(emailVal: string, passwordVal: string) {
     setError(null);
     setLoading(true);
-
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
+    const { error } = await supabase.auth.signInWithPassword({
+      email: emailVal,
+      password: passwordVal,
+    });
     if (error) {
       setError("E-posta veya şifre hatalı.");
       setLoading(false);
       return;
     }
-
     router.push("/dashboard");
     router.refresh();
   }
 
-  function fillDemo() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await loginWithCredentials(email, password);
+  }
+
+  async function fillDemo() {
     setEmail("demo@randevupro.com");
     setPassword("Demo1234");
+    await loginWithCredentials("demo@randevupro.com", "Demo1234");
   }
 
   return (
