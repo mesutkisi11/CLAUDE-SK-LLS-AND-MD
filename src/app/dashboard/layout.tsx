@@ -15,9 +15,16 @@ export default async function DashboardLayout({
   if (!user) redirect("/login");
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div
+      style={{ display: "flex", minHeight: "100vh", background: "#0f0a06" }}
+    >
       <Sidebar user={user} />
-      <main className="flex-1 ml-64 p-8">{children}</main>
+      <main
+        style={{ background: "#0f0a06", padding: "24px", minHeight: "100vh" }}
+        className="flex-1 md:ml-16 pt-20 md:pt-6"
+      >
+        {children}
+      </main>
     </div>
   );
 }
